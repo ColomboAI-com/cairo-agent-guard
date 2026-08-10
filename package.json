@@ -1,0 +1,8 @@
+{
+  "name": "cairo-agent-guard",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {"typecheck": "tsc -p tsconfig.json"},
+  "devDependencies": {"typescript": "^5.7.0"},
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,14 @@
+{
+  "default": "DENY",
+  "rules": [
+    {
+      "match": {
+        "mission": "mission://customer-support-*",
+        "resource": "crm/customer/*",
+        "action": "read",
+        "max_risk": 40
+      },
+      "effect": "ALLOW"
+    }
+  ]
+}

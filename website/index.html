@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Cairo Agent Guard is the zero-trust security protocol and runtime for autonomous agents.">
+  <meta name="theme-color" content="#07110f">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Cairo Agent Guard — Security for the Agentic Internet">
+  <meta property="og:description" content="Contain, defend, and establish verifiable trust for autonomous agents with AGP.">
+  <meta property="og:image" content="https://cairo.sh/AgentGuard/assets/agentguard-og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://cairo.sh/AgentGuard/assets/agentguard-og.png">
+  <title>Cairo Agent Guard — Security for the Agentic Internet</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-api-base="/AgentGuard/api">
+  <a class="skip-link" href="#main">Skip to content</a><div class="grid-bg" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Cairo Agent Guard home"><span class="mark">AG</span><span>Cairo <strong>Agent Guard</strong></span></a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav id="nav" aria-label="Primary navigation"><a href="#product">Product</a><a href="#protocol">AGP</a><a href="#identity">Identity</a><a href="#certification">Certification</a><a href="#docs">Docs</a><a href="#opensource">Open source</a></nav>
+    <a class="button small desktop-cta" href="#quickstart">Start building</a>
+  </header>
+  <main id="main">
+    <section id="top" class="hero shell">
+      <div class="eyebrow"><span class="pulse"></span> AGP v0.1 · Cairo / ColomboAI</div>
+      <h1>The security layer for<br><span>the Agentic Internet.</span></h1>
+      <p class="lead">Contain autonomous agents. Protect platforms from agent attacks. Establish verifiable trust between agents, services, APIs, tools, and physical systems.</p>
+      <div class="hero-actions"><a class="button" href="#quickstart">Integrate Agent Guard</a><a class="button ghost" href="#protocol">Read the protocol →</a></div>
+      <div class="principle"><div class="shield" aria-hidden="true">◆</div><div><strong>Core principle</strong><br>Intelligence is not authority. Every consequential agent action must be explicitly authorized, bounded, observable, and revocable.</div></div>
+      <div class="hero-console" aria-label="Example Agent Guard decision"><div class="console-head"><span></span><span></span><span></span><b>guard://decision/req_8472</b></div><div class="console-grid"><span>IDENTITY</span><b>VERIFIED</b><span>MISSION</span><b>BOUND</b><span>RISK</span><b>17 / 100</b><span>EFFECT</span><b class="allow">ALLOW</b></div></div>
+    </section>
+    <section class="signal-strip" aria-label="Agent Guard pillars"><div><b>CONTAIN</b><span>Keep agents inside authorized boundaries</span></div><div><b>DEFEND</b><span>Protect platforms from external agents</span></div><div><b>TRUST</b><span>Verify identity, mission, and authority</span></div></section>
+    <section id="product" class="shell section">
+      <div class="section-kicker">01 / PLATFORM</div><h2>One architecture.<br>Two directions of protection.</h2>
+      <div class="duo">
+        <article class="panel hot"><div class="tag">AGENT GUARD RUNTIME</div><h3>Protect the world from your agent.</h3><p>Run the Guardian outside model authority. Mediate tools, network, filesystem, secrets, delegated agents, transactions, and PAIP commands.</p><pre>Agent&#10;  ↓&#10;Identity + Mission + Capabilities&#10;  ↓&#10;AGENT GUARD KERNEL&#10;  ↓&#10;Tools · Network · Files · Cloud · PAIP</pre></article>
+        <article class="panel"><div class="tag">AGENT GUARD EDGE</div><h3>Protect your platform from agents.</h3><p>Identify verified, unknown, and hostile autonomous actors before they reach APIs, SaaS, MCP servers, commerce, or data.</p><pre>External autonomous actor&#10;  ↓&#10;AGENT GUARD EDGE&#10;  ↓&#10;Identity · Risk · Policy&#10;  ↓&#10;Allow · Challenge · Deny · Quarantine</pre></article>
+      </div>
+    </section>
+    <section id="protocol" class="section dark-band"><div class="shell">
+      <div class="section-kicker">02 / AGENT GUARD PROTOCOL</div><h2>AGP is the trust protocol<br>for autonomous actors.</h2>
+      <p class="section-copy">AGP standardizes how agents prove who they are, who authorized them, why they are acting, what authority they hold, how it was delegated, and how receiving systems enforce a decision.</p>
+      <div class="protocol-flow"><div class="node"><b>Identity</b><small>Who?</small></div><i>→</i><div class="node"><b>Mission</b><small>Why?</small></div><i>→</i><div class="node"><b>Capability</b><small>What?</small></div><i>→</i><div class="node"><b>Risk</b><small>What changed?</small></div><i>→</i><div class="node accent"><b>Decision</b><small>Enforce</small></div></div>
+      <div class="codebox"><div class="codehead"><span>AgentRequest.json</span><button data-copy="request-code">Copy</button></div><pre id="request-code">{&#10;  "agp_version": "0.1",&#10;  "type": "AgentRequest",&#10;  "agent_id": "agp://cairo/procurement-8472",&#10;  "principal_id": "org://acme",&#10;  "mission_id": "mission://reconcile-invoice-4471",&#10;  "resource": "payments/invoice/4471",&#10;  "action": "propose_payment",&#10;  "identity_token": "&lt;signed identity&gt;",&#10;  "capability_token": "&lt;signed mission capability&gt;",&#10;  "session_id": "session-8472",&#10;  "nonce": "one-time-random-value",&#10;  "risk_score": 17,&#10;  "timestamp": "2026-08-10T20:30:00Z"&#10;}</pre></div>
+    </div></section>
+    <section class="shell section">
+      <div class="section-kicker">03 / SECURITY PRIMITIVES</div><h2>Designed for agents that can<br>reason around instructions.</h2>
+      <div class="cards">
+        <article><span>01</span><h3>Agent Passport</h3><p>Cryptographically verifiable identity and principal binding.</p></article><article><span>02</span><h3>Mission Boundary</h3><p>Authority exists for a declared purpose and expires with it.</p></article><article><span>03</span><h3>Capability Tokens</h3><p>Short-lived, scoped, revocable authority—not raw credentials.</p></article><article><span>04</span><h3>Intent Firewall</h3><p>Detect actions that no longer align with the authorized mission.</p></article><article><span>05</span><h3>Escape Detection</h3><p>Signals for sandbox probing, privilege discovery, and exfiltration.</p></article><article><span>06</span><h3>Blind Secrets</h3><p>Perform authenticated work without revealing credentials to models.</p></article><article><span>07</span><h3>Delegation Guard</h3><p>Child authority remains a strict subset of parent authority.</p></article><article><span>08</span><h3>Economic Guard</h3><p>Bound money, tokens, API consumption, cloud spend, and resources.</p></article><article><span>09</span><h3>Flight Recorder</h3><p>Replay structured actions without collecting private chain-of-thought.</p></article>
+      </div>
+    </section>
+    <section id="identity" class="section identity-band"><div class="shell split">
+      <div><div class="section-kicker">04 / AGENT IDENTITY</div><h2>Know the autonomous actor at your door.</h2><p>Distinguish verified agents from unknown automation. Enforce on identity, principal, mission, capability, delegation, attestation, and live risk.</p><ul class="checks"><li>Signed agent identity</li><li>Principal and organization binding</li><li>Revocation-aware verification</li><li>Mission and capability context</li><li>Runtime attestation hooks</li></ul><a class="button" href="#identity-integrate">Integrate Agent Identity</a></div>
+      <div class="terminal"><div class="term-head">agentguard verify request.agp</div><pre><span class="ok">✓</span> identity       verified&#10;<span class="ok">✓</span> issuer         Cairo Agent Guard CA&#10;<span class="ok">✓</span> principal      acme-corp&#10;<span class="ok">✓</span> mission        reconcile_invoice&#10;<span class="ok">✓</span> capability     invoice:read&#10;<span class="ok">✓</span> revocation     clear&#10;&#10;Trust       VERIFIED&#10;Risk        17 / 100&#10;Decision    <span class="ok">ALLOW</span></pre></div>
+    </div></section>
+    <section id="certification" class="shell section">
+      <div class="section-kicker">05 / CERTIFICATION</div><h2>Become AGP Certified.</h2><p class="section-copy">Validate measurable security properties for your agent, runtime, platform, MCP server, or physical system.</p>
+      <div class="levels"><div><b>AGP-L1</b><span>Identity Ready</span><small>Identity + revocation</small></div><div><b>AGP-L2</b><span>Capability Controlled</span><small>Mission + least authority</small></div><div><b>AGP-L3</b><span>Runtime Protected</span><small>Non-bypassable enforcement</small></div><div><b>AGP-L4</b><span>High Assurance</span><small>Attestation + validation</small></div><div class="physical"><b>AGP-P</b><span>Physical AI</span><small>PAIP + safety controller</small></div></div>
+      <form id="cert-form" class="form-card"><div><label for="organization">Organization</label><input id="organization" name="organization" required maxlength="160" placeholder="Acme AI"></div><div><label for="email">Work email</label><input id="email" type="email" name="email" required maxlength="254" placeholder="security@company.com"></div><div><label for="target">Certification target</label><select id="target" name="target"><option>AI Agent</option><option>Agent Runtime / Harness</option><option>Platform / API</option><option>MCP Server</option><option>Physical AI System</option></select></div><div><label for="level">Requested level</label><select id="level" name="level"><option>AGP-L1</option><option>AGP-L2</option><option>AGP-L3</option><option>AGP-L4</option><option>AGP-P</option></select></div><div class="full"><label for="summary">Architecture and security boundary</label><textarea id="summary" name="summary" required minlength="40" maxlength="4000" placeholder="Describe the system, deployment model, enforcement boundary, and current security controls..."></textarea></div><div class="full form-submit"><button class="button" type="submit">Apply for certification</button><span id="cert-status" class="form-status" role="status" aria-live="polite"></span></div></form>
+    </section>
+    <section id="docs" class="section docs-band"><div class="shell"><div class="section-kicker">06 / DOCUMENTATION</div><h2>Build on Agent Guard.</h2><div class="docs-layout"><aside aria-label="Documentation sections"><button class="doc-link active" data-doc="overview">Overview</button><button class="doc-link" data-doc="quickstart">Quickstart</button><button class="doc-link" data-doc="architecture">Architecture</button><button class="doc-link" data-doc="identity">Agent Identity</button><button class="doc-link" data-doc="policy">Policy model</button><button class="doc-link" data-doc="mcp">MCP Guard</button><button class="doc-link" data-doc="edge">Agent Guard Edge</button><button class="doc-link" data-doc="cairo">Cairo integration</button><button class="doc-link" data-doc="physical">AGP-P / PAIP</button><button class="doc-link" data-doc="cert">Certification</button></aside><article id="doc-content" class="doc-content" tabindex="-1"></article></div></div></section>
+    <section id="identity-integrate" class="shell section"><div class="section-kicker">07 / INTEGRATE IDENTITY</div><h2>Three steps to become agent-aware.</h2><div class="stepgrid"><div><span>1</span><b>Verify</b><p>Validate signature, expiry, issuer, and revocation.</p></div><div><span>2</span><b>Authorize</b><p>Evaluate mission and capability against platform policy.</p></div><div><span>3</span><b>Enforce</b><p>Allow, limit, challenge, quarantine, or deny at the boundary.</p></div></div><div id="quickstart" class="codebox"><div class="codehead"><span>Platform middleware — TypeScript</span><button data-copy="identity-code">Copy</button></div><pre id="identity-code">import { AgentGuardClient } from "@cairo/agentguard";&#10;&#10;const guard = new AgentGuardClient("http://127.0.0.1:8787");&#10;const decision = await guard.authorize(agentRequest);&#10;&#10;if (!["ALLOW", "ALLOW_WITH_LIMITS"].includes(decision.effect)) {&#10;  throw new Error(`Blocked by Agent Guard: ${decision.reason}`);&#10;}</pre></div></section>
+    <section id="opensource" class="section open-band"><div class="shell split"><div><div class="section-kicker">08 / OPEN SOURCE</div><h2>Open protocol.<br>Open core.<br>Enterprise control plane.</h2><p>AGP, schemas, deterministic runtime, SDKs, reference adapters, certification requirements, and Cairo integration contracts are open under Apache-2.0.</p><a class="button ghost-light" href="#repo">Explore Cairo Agent Guard →</a></div><div id="repo" class="repo-tree"><pre>cairo-agent-guard/&#10;├── spec/AGP-v0.1.md&#10;├── schemas/&#10;├── src/agentguard/&#10;├── packages/sdk-ts/&#10;├── integrations/&#10;│   ├── cairo/&#10;│   └── mcp/&#10;├── docs/&#10;├── security/&#10;├── examples/&#10;└── website/</pre></div></div></section>
+    <section class="shell section finale"><div class="eyebrow"><span class="pulse"></span> CAIRO AGENT GUARD</div><h2>Autonomous intelligence needs<br>autonomous security.</h2><p>Build agents that can become more capable without silently becoming more powerful.</p><div class="hero-actions"><a class="button" href="#quickstart">Start integrating</a><a class="button ghost" href="#certification">Get certified</a></div></section>
+  </main>
+  <footer><div class="shell"><div><b>Cairo Agent Guard</b><span>Agentic Security Infrastructure by ColomboAI</span></div><div><span>Cairo.sh/AgentGuard</span><span>AGP v0.1</span><span>© 2026 ColomboAI Inc.</span></div></div></footer>
+  <script src="app.js"></script>
+</body>
+</html>

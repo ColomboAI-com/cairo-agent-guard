@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cairo-agent-guard"
+version = "0.1.0"
+description = "Zero-trust security runtime and Agent Guard Protocol reference implementation"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Cairo / ColomboAI" }]
+
+[project.scripts]
+agentguard = "agentguard.cli:main"
+agentguardd = "agentguard.http:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
