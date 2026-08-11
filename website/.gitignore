@@ -38,3 +38,7 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+
+# The Sites build adapter is source, despite the repository-level build/ rule.
+!/build/
+!/build/sites-vite-plugin.ts
