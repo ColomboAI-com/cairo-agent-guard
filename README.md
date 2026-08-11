@@ -4,11 +4,13 @@
 
 <p align="center">
   <strong>The zero-trust security layer for the Agentic Internet.</strong><br>
-  An open protocol, enforcement runtime, and certification framework for trustworthy autonomous agents.
+  Agent Identity, Agent Guard Protocol, and Agent Guard Edge for trustworthy autonomous systems.
 </p>
 
 <p align="center">
+  <a href="docs/IDENTITY-INTEGRATION.md"><img alt="Agent Identity" src="https://img.shields.io/badge/Agent-Identity-8C52FF"></a>
   <a href="spec/AGP-v0.1.md"><img alt="AGP v0.1" src="https://img.shields.io/badge/AGP-v0.1-6C4DFF"></a>
+  <a href="docs/AGENT-GUARD-EDGE.md"><img alt="Agent Guard Edge" src="https://img.shields.io/badge/Agent%20Guard-Edge-2F86F6"></a>
   <a href="https://www.python.org/downloads/"><img alt="Python 3.11+" src="https://img.shields.io/badge/Python-3.11%2B-2F86F6"></a>
   <a href="LICENSE"><img alt="Apache 2.0" src="https://img.shields.io/badge/License-Apache--2.0-22B8F0"></a>
   <img alt="Status: draft reference implementation" src="https://img.shields.io/badge/Status-Draft%20Reference%20Implementation-8C52FF">
@@ -18,26 +20,36 @@
 > explicitly authorized, narrowly bounded, independently enforced, observable,
 > and revocable.
 
-Cairo Agent Guard is a security foundation for software agents, multi-agent
-systems, MCP ecosystems, enterprise platforms, and physical AI. It gives every
-agent a verifiable identity, every run a principal-bound mission, and every
-consequential action a short-lived capability that can be checked before a tool,
-file, network request, secret, delegated agent, or device is touched.
+Cairo Agent Guard is a three-part security stack for software agents,
+multi-agent systems, MCP ecosystems, enterprise platforms, and physical AI.
 
-The project contains the draft **Agent Guard Protocol (AGP) v0.1**, a runnable
-Python reference runtime and daemon, Python and TypeScript clients, an MCP
-policy proxy, a Cairo Super Agent execution-gateway contract, JSON Schemas,
-certification profiles, deployment guidance, a threat model, and a documentation
-website intended for **[Cairo.sh/AgentGuard](https://cairo.sh/AgentGuard)**.
+**Agent Identity** establishes a signed claim about which agent is acting and
+which principal it represents. **Agent Guard Protocol (AGP)** expresses
+mission-bound authority.
+
+**Agent Guard Edge** protects receiving platforms by verifying, classifying,
+constraining, challenging, or blocking autonomous actors before they reach
+valuable resources.
+
+The repository contains the draft protocol, identity authority and verification
+flow, Edge architecture, and runnable Python runtime and daemon.
+
+It also contains Python and TypeScript clients, an MCP policy proxy, Cairo
+execution-gateway contract, JSON Schemas, certification profiles, deployment
+guidance, threat model, and a site intended for
+**[Cairo.sh/AgentGuard](https://cairo.sh/AgentGuard)**.
 
 ## Contents
 
 - [Why Agent Guard](#why-agent-guard)
+- [The three pillars](#the-three-pillars)
 - [The security model](#the-security-model)
+- [Agent Identity](#agent-identity)
 - [How it works](#how-it-works)
 - [What ships in V0.1](#what-ships-in-v01)
-- [Protocol primitives](#protocol-primitives)
+- [Agent Guard Protocol](#agent-guard-protocol-agp)
 - [Authorization and risk](#authorization-and-risk)
+- [Agent Guard Edge](#agent-guard-edge)
 - [Architecture](#architecture)
 - [Quick start](#quick-start)
 - [End-to-end authorization](#end-to-end-authorization)
@@ -53,10 +65,13 @@ website intended for **[Cairo.sh/AgentGuard](https://cairo.sh/AgentGuard)**.
 ## Why Agent Guard
 
 Agentic systems cross a security boundary that conventional application controls
-were not designed to govern. An agent can interpret untrusted content, plan over
-long horizons, select tools, create sub-agents, use credentials, mutate external
-systems, and continue operating after the original user interaction has ended.
-That makes a prompt, model policy, or tool description insufficient as an
+were not designed to govern.
+
+An agent can interpret untrusted content, plan over long horizons, select tools,
+create sub-agents, use credentials, mutate systems, and continue operating after
+the original user interaction ends.
+
+A prompt, model policy, or tool description is therefore insufficient as an
 authorization system.
 
 Agent Guard addresses the gap by separating two concerns:
@@ -67,8 +82,34 @@ Agent Guard addresses the gap by separating two concerns:
 
 The model never grants itself authority. Retrieved text, a website, an email, a
 tool response, another agent, or prompt injection cannot enlarge a signed
-capability. Policy is evaluated by a Guardian outside the model's control
-boundary, and the host performs the operation only after an explicit decision.
+capability.
+
+Policy is evaluated by a Guardian outside the model's control boundary. The host
+performs the operation only after an explicit decision.
+
+## The three pillars
+
+Agent Guard is broader than AGP. The protocol is the shared language inside a
+larger identity and enforcement system.
+
+| Pillar | Core question | Role |
+|---|---|---|
+| **Agent Identity** | Who is acting, and for whom? | Signed identity, principal binding, issuer trust, lifecycle, rotation, revocation, and agent-aware audit. |
+| **Agent Guard Protocol** | What authority was granted? | Portable missions, capabilities, delegation, risk, decisions, incidents, attestations, and revocations. |
+| **Agent Guard Edge** | Will this platform accept the action? | Receiving-side discovery, verification, local policy, challenge, rate control, DLP, isolation, quarantine, and evidence. |
+
+```mermaid
+flowchart LR
+    I["Agent Identity\nWho is acting?"] --> R["AgentRequest"]
+    P["AGP\nWhat authority exists?"] --> R
+    R --> E["Agent Guard Edge\nWill this platform allow it?"]
+    E -->|"allow or limit"| S["Protected service"]
+    E -->|"challenge, deny, quarantine"| B["Blocked + audited"]
+```
+
+The three pillars can be adopted together or incrementally. Their security
+properties are strongest when identity, portable authority, and non-bypassable
+enforcement are all present.
 
 ## The security model
 
@@ -97,6 +138,38 @@ No signed identity
   or an unacceptable risk
       = no side effect
 ```
+
+## Agent Identity
+
+Agent Identity makes an autonomous actor a distinct, verifiable security
+subject. It binds a stable `agent_id` to the human or organization represented
+by `principal_id`, under a trusted issuer and signing key.
+
+V0.1 verifies the issuer's signed identity claim. Proof that the current
+presenter controls that agent requires request-envelope proof-of-possession,
+which remains next-protocol work.
+
+A complete identity system covers more than token issuance:
+
+```text
+Register → prove principal authority → issue → present → verify
+         → authorize → rotate → revoke or retire
+```
+
+Receiving platforms verify issuer, key, signature, lifetime, agent and principal
+binding, and revocation before evaluating mission and capability.
+
+Identity is not permission. A verified customer-support agent remains unable to
+delete a cloud deployment unless a matching capability and local policy both
+allow that exact action.
+
+V0.1 implements the local signed-identity foundations summarized in the
+[implementation status](docs/IDENTITY-INTEGRATION.md#current-implementation-status).
+
+Managed CA, federation, public discovery, hardware-backed identity, remote
+attestation, and a global agent registry remain roadmap capabilities.
+
+Read the complete [Agent Identity integration guide](docs/IDENTITY-INTEGRATION.md).
 
 ## How it works
 
@@ -135,6 +208,8 @@ For each consequential action:
 The current repository is executable, not only a design document:
 
 - signed, expiring `AgentIdentity` documents with issuer and key identifiers;
+- a documented Agent Identity lifecycle, issuer trust model, and platform
+  integration profile;
 - principal-bound mission registration and immediate termination;
 - signed, mission-bound `AgentCapability` tokens;
 - conservative wildcard resource matching and explicit action scopes;
@@ -146,6 +221,8 @@ The current repository is executable, not only a design document:
 - one-time request IDs, nonces, timestamp freshness, and replay rejection;
 - a mandatory execution gateway that blocks before invocation;
 - an MCP JSON-RPC `tools/call` policy proxy and blocking demonstration;
+- receiving-side Edge reference primitives for identity and authority
+  verification, enforcement ordering, revocation, quarantine, and evidence;
 - blind secret execution with response scrubbing;
 - SQLite-backed runtime state and JSONL hash-chained audit evidence;
 - a dependency-free local HTTP daemon and Python client;
@@ -156,9 +233,13 @@ The current repository is executable, not only a design document:
 - conformance-oriented tests for protocol, runtime, gateway, MCP, secrets,
   certification, audit concurrency, HTTP, SDK, schemas, and website behavior.
 
-## Protocol primitives
+## Agent Guard Protocol (AGP)
 
-AGP v0.1 defines a shared vocabulary across agents and platforms.
+AGP is the open trust and control protocol connecting identities, runtimes,
+Edge gateways, resource servers, authorization services, and auditors.
+
+It defines a shared vocabulary across agents and platforms. AGP is one pillar
+of Agent Guard; it does not replace identity lifecycle or Edge enforcement.
 
 | Object | Purpose |
 |---|---|
@@ -209,7 +290,70 @@ thresholds:
 Deployments may apply stricter thresholds. They must never use risk to widen a
 resource, action, mission, principal, agent, time, or delegation boundary.
 
+The normative AGP default bands describe `26–50` as constrained. The current
+Guard does not yet emit `ALLOW_WITH_LIMITS` for that band, so this is an explicit
+V0.1 conformance gap rather than a claim that the protocol changed.
+
+## Agent Guard Edge
+
+Agent Guard Edge protects the receiving platform from agents operated by other
+teams, tenants, vendors, or autonomous systems.
+
+It sits before APIs, SaaS, MCP servers, data platforms, commerce, cloud, and
+devices. Edge converts an inbound request into a canonical `AgentRequest`, then
+intersects signed agent authority with the platform's own policy.
+
+```text
+External autonomous actor
+            │
+            ▼
+AGENT GUARD EDGE
+Discover → Verify → Classify → Authorize → Enforce → Audit
+            │
+            ▼
+API · SaaS · MCP · Data · Commerce · Cloud · Device
+```
+
+Edge recognizes six useful trust states:
+
+| State | Treatment |
+|---|---|
+| `VERIFIED` | Continue to mission, capability, and local-policy checks. |
+| `CONSTRAINED` | Permit only narrower routes, methods, budgets, or data. |
+| `CHALLENGED` | Require stronger identity, attestation, or exact approval. |
+| `UNKNOWN` | Deny sensitive access or isolate to a low-trust surface. |
+| `REVOKED` | Deny and emit a linked security event. |
+| `HOSTILE` | Deny, quarantine, and propagate threat intelligence. |
+
+Deployment patterns include reverse proxy, API-gateway policy module, MCP
+gateway, service-mesh sidecar, SaaS agent ingress, and physical-system gateway.
+
+The V0.1 codebase provides Edge building blocks, not yet a managed distributed
+Edge service. Global enforcement, distributed replay defense, adaptive behavior
+detection, semantic DLP, SIEM/SOAR, HA, and SLAs remain platform work.
+
+Read the complete [Agent Guard Edge architecture](docs/AGENT-GUARD-EDGE.md).
+
 ## Architecture
+
+Agent Guard secures both directions of agent interaction:
+
+```mermaid
+flowchart LR
+    P["Principal"] --> C["Cairo / owned agent"]
+    C --> R["Agent Guard Runtime"]
+    R --> W["External world"]
+    X["External agent"] --> E["Agent Guard Edge"]
+    E --> S["Your platform"]
+    I["Agent Identity"] --> R
+    I --> E
+    A["AGP authority"] --> R
+    A --> E
+```
+
+- **Runtime** protects other systems from an agent you operate.
+- **Edge** protects your systems from agents operated elsewhere.
+- **Identity** and **AGP** give both boundaries the same verifiable context.
 
 ```text
 User / enterprise policy
@@ -245,7 +389,9 @@ cairo-agent-guard/
 ├── packages/sdk-ts/             # dependency-free TypeScript client
 ├── integrations/cairo/          # Cairo mandatory gateway contract
 ├── integrations/mcp/            # MCP Guard integration guidance
-├── docs/                         # API, deployment, identity, roadmap, certification
+├── docs/IDENTITY-INTEGRATION.md # Agent Identity lifecycle and integration
+├── docs/AGENT-GUARD-EDGE.md     # receiving-side Edge architecture
+├── docs/                         # API, deployment, roadmap, and certification
 ├── security/                     # threat model and disclosure policy
 ├── examples/                     # runnable policy and MCP demonstrations
 ├── tests/                        # conformance and regression tests
@@ -465,23 +611,44 @@ mediates:
 - delegation to child agents.
 
 Every Cairo run carries an `agentId`, `principalId`, `missionId`, signed identity,
-capability, session, policy-bundle hash, and risk score. Direct executor handles
-must never be placed in model-controlled code. See the
+capability, session, policy-bundle hash, and risk score.
+
+Direct executor handles must never be placed in model-controlled code. See the
 [Cairo integration contract](integrations/cairo/README.md).
 
 ### MCP Guard
 
 `MCPGuardProxy` intercepts MCP JSON-RPC `tools/call`, maps it to an AGP resource,
-and calls upstream only on `ALLOW` or `ALLOW_WITH_LIMITS`. A production adapter
-must also prevent the agent from opening a second, unguarded connection to the
-MCP server. See [MCP integration guidance](integrations/mcp/README.md).
+and calls upstream only on `ALLOW` or `ALLOW_WITH_LIMITS`.
+
+A production adapter must also prevent the agent from opening a second,
+unguarded connection to the MCP server. See
+[MCP integration guidance](integrations/mcp/README.md).
 
 ### Agent identity for platforms
 
-Platforms should validate issuer, signature, expiry, principal binding, mission,
-capability, and revocation—not merely accept an `Agent-ID` string. The HTTP
-profile and integration checklist are in
-[Integrate Agent Identity into Your Platform](docs/IDENTITY-INTEGRATION.md).
+Platforms should treat Agent Identity as a complete lifecycle, not a header.
+They must validate issuer, signature, expiry, principal binding, revocation,
+mission, and capability—not merely accept an `Agent-ID` string.
+
+The guide covers registration, issuance, presentation, verification, rotation,
+revocation, trust policy, key management, privacy, and API/MCP integration:
+[Agent Identity](docs/IDENTITY-INTEGRATION.md).
+
+### Agent Guard Edge
+
+Receiving platforms can use the runtime and SDKs as Edge foundations. Normalize
+the inbound operation and verify Agent Identity and AGP authority.
+
+A platform adapter must then apply the receiving platform's local policy and
+forward only allowed or correctly limited actions. V0.1 does not ship a
+configurable Edge policy evaluator.
+
+The Edge guide covers trust states, the decision pipeline, data/control planes,
+reverse-proxy and gateway patterns, challenges, DLP, and economic controls.
+
+It also covers quarantine, operations, privacy, and product status:
+[Agent Guard Edge](docs/AGENT-GUARD-EDGE.md).
 
 ## Agent certification
 
@@ -552,9 +719,11 @@ runtime as a security control.
 ### Threats addressed
 
 The reference design directly models prompt injection, forged identity and
-capability, replay, confused-deputy attacks, delegation escalation, direct
-tool/network bypass, credential theft, audit tampering, Guardian failure, and
-kill-evasion through descendants. Details and trust assumptions are in the
+capability, replay, confused-deputy attacks, delegation escalation, and direct
+tool or network bypass.
+
+It also models credential theft, audit tampering, Guardian failure, and kill
+evasion through descendants. Details are in the
 [V0.1 threat model](security/THREAT-MODEL.md).
 
 ### Explicit V0.1 limitations
@@ -581,30 +750,33 @@ remote immutable audit storage, and platform-native containment.
 
 The open foundation is intentionally broad:
 
+- Agent Identity document, lifecycle, verification profile, and schemas;
 - AGP specification and JSON Schemas;
 - deterministic authorization runtime and conformance tests;
 - Python and TypeScript SDKs;
+- Agent Guard Edge architecture and reference enforcement interfaces;
 - reference MCP and Cairo integrations;
 - certification profiles and evidence requirements;
 - examples, documentation, deployment guidance, and threat model.
 
-The future managed platform can add operational capabilities that do not need to
-be protocol-closed: managed certificate authority and identity, Agent SOC,
-semantic DLP, behavioral and escape detection, threat intelligence, managed
-Agent Guard Edge, remote attestation, enterprise secret brokers, compliance
+The future managed platform can add managed Agent Identity CA and federation,
+registry and discovery, global Agent Guard Edge, semantic DLP, behavioral and
+escape detection, threat intelligence, and Agent SOC.
+
+It can also add remote attestation, enterprise secret brokers, compliance
 evidence, managed certification, high availability, and SLAs.
 
-The protocol remains useful without the commercial control plane and is licensed
-under Apache-2.0.
+Identity, AGP, and the reference Edge interfaces remain useful without the
+commercial control plane and are licensed under Apache-2.0.
 
 ## Roadmap
 
 | Phase | Outcome |
 |---|---|
-| **0 — Foundation** | AGP v0.1, schemas, deterministic core, SDKs, Cairo contract, website, docs, certification UX. |
-| **1 — Developer wedge** | Local daemon, policy compiler, MCP Guard, audit stream, default-deny egress, filesystem/shell mediation, blind secrets. |
+| **0 — Foundation** | Agent Identity, AGP v0.1, Edge architecture, schemas, deterministic core, SDKs, Cairo contract, website, docs, certification UX. |
+| **1 — Developer wedge** | Identity issuer/verifier, local daemon, policy compiler, MCP Guard, Edge adapter, audit stream, blind secrets. |
 | **2 — Cairo-native enforcement** | Mandatory identity/mission per run, all consequential paths through the gateway, approvals, quarantine trees, Agent SOC. |
-| **3 — Enterprise platform** | Hosted control plane, SSO/RBAC, Agent Edge, DLP, behavior detection, SIEM/SOAR, attestation, registry, evidence. |
+| **3 — Enterprise platform** | Managed Agent Identity, registry, global Agent Guard Edge, SSO/RBAC, DLP, behavior detection, SIEM/SOAR, attestation, evidence. |
 | **4 — Ecosystem and certification** | Conformance suite, public registry, AGP-L1 through L4 and AGP-P, partner labs, threat exchange. |
 | **5 — Physical AI** | PAIP binding, device identity, safety envelopes, operator authorization, fleet quarantine, hardware-backed safety. |
 
@@ -612,15 +784,20 @@ The detailed execution sequence is maintained in [ROADMAP.md](docs/ROADMAP.md).
 
 ## Project status
 
-**Current release:** AGP v0.1 draft reference implementation.
+**Current release:** Cairo Agent Guard V0.1 foundation with draft AGP v0.1.
 
-The core protocol objects, deterministic evaluator, local runtime, daemon, SDKs,
-MCP adapter, Cairo integration contract, schemas, documentation, certification
-intake, and tests are implemented. Remaining work includes production-grade
-cryptography and distributed state, full request-envelope proof-of-possession,
-signed approval consumption, platform-native containment, hosted services,
-public certification operations, deployment at `Cairo.sh/AgentGuard`, and direct
-wiring into the Cairo Super Agent runtime.
+Implemented today: signed Agent Identity issuance and verification, the AGP
+object model, deterministic evaluator, local runtime, daemon, SDKs, MCP adapter,
+Cairo contract, and Edge enforcement foundations.
+
+Schemas, documentation, certification intake, and tests are also included.
+
+Remaining work includes managed Agent Identity, federation and registry,
+production cryptography, and distributed Edge data and control planes.
+
+Full request proof-of-possession, signed approvals, platform containment,
+hosted services, public certification, `Cairo.sh/AgentGuard`, and direct Cairo
+wiring also remain.
 
 ## Contributing and security reports
 

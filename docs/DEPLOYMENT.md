@@ -15,3 +15,19 @@ deployment must additionally ensure the agent cannot obtain an alternate path.
 
 The static site should mount at `/AgentGuard`; proxy `/AgentGuard/api/*` to the
 daemon's `/v1/*` and health endpoints, preserving HTTPS and request limits.
+
+## Agent Guard Edge deployments
+
+For receiving-side protection, deploy Agent Guard Edge as a reverse proxy,
+API-gateway policy module, MCP gateway, service-mesh sidecar, SaaS agent ingress,
+or physical-system gateway.
+
+Edge must be the only route to the protected upstream. A policy check that an
+agent can bypass is observability, not enforcement.
+
+Keep identity and capability verification in the data path. Distribute issuer
+trust, policy, revocation, and threat intelligence through a separately
+authenticated control plane.
+
+See [Agent Guard Edge](AGENT-GUARD-EDGE.md) for the full architecture and
+[Agent Identity](IDENTITY-INTEGRATION.md) for the verifier lifecycle.
