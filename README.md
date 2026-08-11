@@ -805,7 +805,7 @@ Contributions are welcome across protocol design, schemas, language SDKs,
 runtime enforcement, MCP adapters, platform integrations, conformance testing,
 documentation, and threat research.
 
-- Review the [work plan](docs/WORK.md) and [roadmap](docs/ROADMAP.md).
+- Review the [roadmap](docs/ROADMAP.md).
 - Keep protocol behavior deterministic and default-deny.
 - Add tests for new authority, delegation, replay, revocation, or gateway paths.
 - Never make model output, retrieved data, or prompt text an authorization
