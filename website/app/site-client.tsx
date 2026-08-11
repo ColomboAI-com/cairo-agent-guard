@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent, ReactNode } from "react";
-import { useId, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 function CairoLogo({ title }: { title?: string }) {
   const gradientId = `cairo-logo-${useId().replaceAll(":", "")}`;
@@ -56,6 +56,42 @@ const decisions = [
   "DENY",
   "TERMINATE",
 ];
+
+const navigation = [
+  ["Why now", "why"],
+  ["Identity", "identity"],
+  ["Runtime", "runtime"],
+  ["Edge", "edge"],
+  ["Certification", "certification"],
+  ["Docs", "docs"],
+] as const;
+
+const threats = [
+  ["Unknown agents", "A platform cannot safely trust an actor it cannot identify, bind to a principal, or revoke."],
+  ["Prompt-level controls", "Instructions inside the same model context cannot be the final authority over consequential side effects."],
+  ["Over-broad credentials", "Static keys turn a narrow task into ambient authority across tools, data, cloud, commerce, and devices."],
+  ["Delegation sprawl", "Child agents can silently expand reach unless every handoff remains inside parent scope, time, risk, and depth."],
+  ["Bypass paths", "A guard is only real when untrusted code has no alternate path to executors, upstreams, secrets, or actuators."],
+  ["Unverifiable claims", "Security assertions need structured evidence, measurable profiles, revocation state, and independent validation."],
+] as const;
+
+const integrations = [
+  ["Cairo Super Agent", "Reference integration", "Mandatory execution gateway beneath the planner."],
+  ["MCP", "Reference adapter", "Authorize every tools/call before the upstream is reached."],
+  ["API gateways", "Architecture pattern", "Apply receiving-platform policy at agent-aware ingress."],
+  ["Service mesh", "Architecture pattern", "Enforce close to workloads through a sidecar or policy module."],
+  ["SaaS platforms", "Architecture pattern", "Classify, constrain, challenge, or deny external agents."],
+  ["Physical AI", "Protocol profile", "Carry safety context to a separate controller and emergency stop."],
+] as const;
+
+const faqs = [
+  ["Is Agent Guard another prompt firewall?", "No. Prompt controls can help, but Agent Guard places authorization and execution outside model control, then pairs that runtime boundary with receiving-side platform policy."],
+  ["Does a verified identity grant access?", "No. Identity establishes a signed subject and principal claim. Permission still requires mission-bound capability, local policy, current risk, and revocation checks."],
+  ["What is open source today?", "The V0.1 protocol, schemas, deterministic reference runtime, SDKs, adapters, Edge architecture, certification profiles, documentation, and threat model are published under Apache-2.0."],
+  ["Is Agent Guard Edge a managed service today?", "Not yet. V0.1 provides architecture and reference enforcement primitives. Distributed replay, semantic DLP, global control plane, high availability, and service-level commitments remain platform work."],
+  ["Can Agent Guard protect physical systems?", "AGP-P defines a physical-AI assurance profile, but software authorization never replaces an independent safety controller, operating envelope, or emergency stop."],
+  ["What does a certification application mean?", "It starts scoping and evidence review. Submission is not itself a certificate, approval, or claim of conformance."],
+] as const;
 
 const docs: Record<string, { label: string; title: string; body: ReactNode }> = {
   overview: {
@@ -229,11 +265,61 @@ const requestExample = `{
 
 export function AgentGuardSite() {
   const [navOpen, setNavOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("top");
   const [activeDoc, setActiveDoc] = useState("overview");
+  const [docQuery, setDocQuery] = useState("");
   const [copyLabel, setCopyLabel] = useState("Copy request");
   const [formStatus, setFormStatus] = useState("");
   const [formError, setFormError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const current = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (current?.target.id) setActiveSection(current.target.id);
+      },
+      { rootMargin: "-25% 0px -60%", threshold: [0.05, 0.2, 0.5] },
+    );
+    navigation.forEach(([, id]) => {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("agentguard-certification-draft");
+    if (!saved || !formRef.current) return;
+    try {
+      const values = JSON.parse(saved) as Record<string, string>;
+      Object.entries(values).forEach(([name, value]) => {
+        const field = formRef.current?.elements.namedItem(name);
+        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) field.value = value;
+      });
+    } catch {
+      sessionStorage.removeItem("agentguard-certification-draft");
+    }
+  }, []);
+
+  const filteredDocs = useMemo(() => {
+    const query = docQuery.trim().toLowerCase();
+    if (!query) return Object.entries(docs);
+    return Object.entries(docs).filter(([, doc]) => `${doc.label} ${doc.title}`.toLowerCase().includes(query));
+  }, [docQuery]);
+
+  function saveCertificationDraft() {
+    if (!formRef.current) return;
+    const fields = Object.fromEntries(
+      [...new FormData(formRef.current).entries()]
+        .filter(([name]) => name !== "companyWebsite")
+        .map(([name, value]) => [name, String(value)]),
+    );
+    sessionStorage.setItem("agentguard-certification-draft", JSON.stringify(fields));
+  }
 
   async function copyRequest() {
     try {
@@ -262,6 +348,7 @@ export function AgentGuardSite() {
       const result = (await response.json()) as { application_id?: string; error?: string };
       if (!response.ok) throw new Error(result.error || "Application could not be submitted.");
       form.reset();
+      sessionStorage.removeItem("agentguard-certification-draft");
       setFormStatus(`Application ${result.application_id} received. Evidence review is next.`);
     } catch (error) {
       setFormError(true);
@@ -294,26 +381,22 @@ export function AgentGuardSite() {
           Menu
         </button>
         <nav id="primary-nav" className={navOpen ? "open" : ""} aria-label="Primary navigation">
-          <a href="#identity" onClick={() => setNavOpen(false)}>Identity</a>
-          <a href="#protocol" onClick={() => setNavOpen(false)}>AGP</a>
-          <a href="#edge" onClick={() => setNavOpen(false)}>Edge</a>
-          <a href="#runtime" onClick={() => setNavOpen(false)}>Runtime</a>
-          <a href="#certification" onClick={() => setNavOpen(false)}>Certification</a>
-          <a href="#docs" onClick={() => setNavOpen(false)}>Docs</a>
+          {navigation.map(([label, id]) => <a key={id} className={activeSection === id ? "active" : ""} aria-current={activeSection === id ? "location" : undefined} href={`#${id}`} onClick={() => setNavOpen(false)}>{label}</a>)}
         </nav>
-        <a className="button button-small desktop-cta" href="#quickstart">Start building</a>
+        <a className="button button-small desktop-cta" href="#quickstart">Integrate now</a>
       </header>
 
       <main id="main">
         <section id="top" className="hero shell">
           <div className="hero-copy">
             <div className="eyebrow"><span /> Cairo / ColomboAI · V0.1 Foundation</div>
-            <h1>Security infrastructure for the <em>Agentic Internet.</em></h1>
-            <p className="hero-lead">Know the agent. Bound its authority. Enforce before action.</p>
+            <p className="hero-category">Security infrastructure for the <em>Agentic Internet.</em></p>
+            <h1>Every AI Agent Needs an <em>Identity.</em></h1>
+            <p className="hero-lead">Identity. Containment. Certification. Platform defense.</p>
             <p className="hero-detail">Cairo Agent Guard combines Agent Identity, an open trust protocol, a non-bypassable runtime, and receiving-side Edge protection for software agents and physical AI.</p>
             <div className="hero-actions">
-              <a className="button" href="#pillars">Explore the platform</a>
-              <a className="button button-ghost" href="https://github.com/ColomboAI-com/cairo-agent-guard">View open source</a>
+              <a className="button" href="#quickstart">Integrate Agent Identity</a>
+              <a className="button button-ghost" href="#certification">Apply for certification</a>
             </div>
             <div className="principle"><span>01</span><p><b>Intelligence is not authority.</b> Every consequential action must be explicitly authorized, narrowly bounded, observable, and revocable.</p></div>
           </div>
@@ -325,7 +408,8 @@ export function AgentGuardSite() {
             <div className="signal signal-identity"><span>IDENTITY</span><b>VERIFIED CLAIM</b></div>
             <div className="signal signal-mission"><span>MISSION</span><b>BOUND</b></div>
             <div className="signal signal-risk"><span>RISK</span><b>17 / 100</b></div>
-            <div className="signal signal-effect"><span>DECISION</span><b>ALLOW</b></div>
+            <div className="signal signal-effect"><span>DECISION</span><b>ALLOW WITH LIMITS</b></div>
+            <div className="hero-flow" aria-hidden="true"><span>IDENTIFY</span><i>→</i><span>BOUND</span><i>→</i><span>ENFORCE</span><i>→</i><span>PROVE</span></div>
           </div>
         </section>
 
@@ -336,15 +420,28 @@ export function AgentGuardSite() {
           <div><b>PROVE</b><span>Structured, revocation-linked evidence</span></div>
         </section>
 
+        <section id="why" className="section threat-section shell">
+          <div className="section-heading">
+            <div><span className="kicker">WHY AGENT GUARD / WHY NOW</span><h2>Agents are becoming actors. Security has to catch up.</h2></div>
+            <p>Autonomous systems now cross application boundaries, operate tools, delegate work, spend money, reach sensitive data, and affect the physical world. Existing human identity and API-key models do not describe that authority precisely enough.</p>
+          </div>
+          <div className="threat-grid">
+            {threats.map(([title, body], index) => <article key={title}><span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3><p>{body}</p></article>)}
+          </div>
+          <div className="threat-statement"><b>THE DESIGN RULE</b><p>Models may propose. Only an independent, deterministic security boundary may authorize and execute.</p></div>
+        </section>
+
         <section id="pillars" className="section shell">
           <div className="section-heading">
-            <div><span className="kicker">THE AGENT GUARD STACK</span><h2>Three pillars.<br />One trust boundary.</h2></div>
-            <p>AGP is the language—not the whole product. Identity establishes the signed subject. AGP carries authority. Edge makes the receiving platform sovereign.</p>
+            <div><span className="kicker">THE AGENT GUARD STACK</span><h2>Five trust pillars.<br />One enforceable boundary.</h2></div>
+            <p>Identity establishes the signed subject. AGP carries mission-bound authority. Runtime contains the actor. Certification turns claims into evidence. Edge keeps the receiving platform sovereign.</p>
           </div>
           <div className="pillar-grid">
             <article className="pillar identity-pillar"><span className="pillar-number">01</span><div className="pillar-icon">ID</div><h3>Agent Identity</h3><p>Who is acting, which principal it represents, who issued the claim, and whether it remains valid.</p><ul><li>Stable agent identity</li><li>Principal binding</li><li>Issuer trust and rotation</li><li>Revocation-aware verification</li></ul><a href="#identity">Explore Identity →</a></article>
-            <article className="pillar protocol-pillar"><span className="pillar-number">02</span><div className="pillar-icon">AGP</div><h3>Agent Guard Protocol</h3><p>Portable mission, capability, delegation, risk, decision, attestation, and incident context.</p><ul><li>Default deny</li><li>Monotonic delegation</li><li>Risk-only tightening</li><li>Ten decision effects</li></ul><a href="#protocol">Read the protocol →</a></article>
-            <article className="pillar edge-pillar"><span className="pillar-number">03</span><div className="pillar-icon">EDGE</div><h3>Agent Guard Edge</h3><p>Receiving-side discovery, verification, platform policy, containment, and security evidence.</p><ul><li>Trust classification</li><li>Challenge and step-up</li><li>Rate, data, economic control</li><li>Quarantine and denial</li></ul><a href="#edge">Explore Edge →</a></article>
+            <article className="pillar"><span className="pillar-number">02</span><div className="pillar-icon">RUN</div><h3>Runtime containment</h3><p>A non-bypassable Guardian owns the only handles for tools, files, network, credentials, cloud, commerce, and devices.</p><ul><li>Mandatory execution gateway</li><li>Blind secret use</li><li>Replay defense</li><li>Quarantine trees</li></ul><a href="#runtime">Inspect the runtime →</a></article>
+            <article className="pillar protocol-pillar"><span className="pillar-number">03</span><div className="pillar-icon">AGP</div><h3>Agent Guard Protocol</h3><p>Portable mission, capability, delegation, risk, decision, attestation, and incident context.</p><ul><li>Default deny</li><li>Monotonic delegation</li><li>Risk-only tightening</li><li>Ten decision effects</li></ul><a href="#protocol">Read AGP →</a></article>
+            <article className="pillar"><span className="pillar-number">04</span><div className="pillar-icon">CERT</div><h3>Certification</h3><p>Measurable assurance profiles for agents, runtimes, platforms, MCP servers, and physical AI systems.</p><ul><li>Evidence review</li><li>Conformance testing</li><li>Independent validation</li><li>Revocation-aware status</li></ul><a href="#certification">View assurance levels →</a></article>
+            <article className="pillar edge-pillar"><span className="pillar-number">05</span><div className="pillar-icon">EDGE</div><h3>Platform defense</h3><p>Receiving-side discovery, verification, local policy, containment, and security evidence.</p><ul><li>Trust classification</li><li>Challenge and step-up</li><li>Rate, data, economic control</li><li>Quarantine and denial</li></ul><a href="#edge">Explore Edge →</a></article>
           </div>
         </section>
 
@@ -396,13 +493,13 @@ export function AgentGuardSite() {
           </div>
         </section>
 
-        <section className="section architecture-section shell">
+        <section id="architecture" className="section architecture-section shell">
           <div className="section-heading"><div><span className="kicker">DEPLOYMENT ARCHITECTURE</span><h2>Policy centralization.<br />Enforcement everywhere.</h2></div><p>A high-assurance deployment separates fast, local request decisions from administrative authority and global intelligence.</p></div>
           <div className="plane-grid"><article><span>DATA PLANE</span><h3>Decide in the path.</h3><ul><li>Canonical request parsing</li><li>Identity and capability verification</li><li>Mission, replay, revocation, and risk</li><li>Gateway enforcement and response limits</li><li>Structured security telemetry</li></ul></article><article><span>CONTROL PLANE</span><h3>Govern the fleet.</h3><ul><li>Issuer and key trust</li><li>Policy distribution and versioning</li><li>Revocation and threat intelligence</li><li>Agent registry and certification</li><li>Incidents, evidence, and operations</li></ul></article></div>
           <div className="nonbypass"><b>NON-BYPASSABILITY</b><p>The agent must have no alternate route to tools, upstream services, credentials, network egress, protected files, or physical actuators.</p></div>
         </section>
 
-        <section className="section cairo-section">
+        <section id="cairo" className="section cairo-section">
           <div className="shell split-layout">
             <div><span className="kicker">CAIRO SUPER AGENT</span><h2>Cairo Super Agent security beneath the planner—not inside the prompt.</h2><p className="section-lead">Every Cairo run receives a signed identity, principal, mission, capability, session, policy hash, and risk state. Direct executor handles never enter model-controlled code.</p><ul className="check-list"><li>Tools and MCP</li><li>Shell and filesystem</li><li>Network and credentials</li><li>Purchases and cloud</li><li>Delegated agents</li><li>PAIP and physical AI</li></ul></div>
             <div className="code-panel cairo-code"><div className="code-head"><span>CairoExecutionGateway.ts</span><span>REFERENCE CONTRACT</span></div><pre>{`await gateway.execute(
@@ -416,18 +513,26 @@ export function AgentGuardSite() {
           </div>
         </section>
 
+        <section id="integrations" className="section integrations-section shell">
+          <div className="section-heading"><div><span className="kicker">INTEGRATIONS & ECOSYSTEM</span><h2>One security model across the agentic stack.</h2></div><p>Start with a reference integration or carry the same identity, authority, enforcement, and evidence model into your own ingress and execution boundary.</p></div>
+          <div className="integration-grid">
+            {integrations.map(([name, status, body]) => <article key={name}><div><span>{status}</span><b aria-hidden="true">↗</b></div><h3>{name}</h3><p>{body}</p></article>)}
+          </div>
+          <div className="ecosystem-callout"><div><span className="kicker">BUILD WITH US</span><h3>Bring Agent Identity to your platform.</h3><p>Use the open schemas, verifier, capability model, runtime contracts, and Edge architecture as the foundation for an agent-aware trust boundary.</p></div><div className="hero-actions"><a className="button" href="#quickstart">Open the integration path</a><a className="button button-ghost" href="https://github.com/ColomboAI-com/cairo-agent-guard">Contribute on GitHub</a></div></div>
+        </section>
+
         <section id="certification" className="section certification-section shell">
           <div className="section-heading"><div><span className="kicker">AGENT GUARD CERTIFICATION</span><h2>Turn security claims into evidence.</h2></div><p>Apply measurable assurance profiles to agents, runtimes, platforms, MCP servers, and physical AI systems.</p></div>
           <div className="levels"><article><b>AGP-L1</b><span>Identity Ready</span><small>Identity · principal · revocation</small></article><article><b>AGP-L2</b><span>Capability Controlled</span><small>Mission · least authority · audit</small></article><article><b>AGP-L3</b><span>Runtime Protected</span><small>Non-bypassable enforcement</small></article><article><b>AGP-L4</b><span>High Assurance</span><small>Attestation · independent validation</small></article><article><b>AGP-P</b><span>Physical AI</span><small>PAIP · safety controller · E-stop</small></article></div>
           <div className="cert-flow"><span>Apply</span><i>→</i><span>Scope</span><i>→</i><span>Evidence</span><i>→</i><span>Conformance</span><i>→</i><span>Validation</span><i>→</i><span>Certificate</span></div>
-          <form className="cert-form" onSubmit={submitCertification}>
+          <form ref={formRef} className="cert-form" onInput={saveCertificationDraft} onChange={saveCertificationDraft} onSubmit={submitCertification}>
             <div className="form-intro"><span className="kicker">START AN ASSESSMENT</span><h3>Apply for Agent Guard certification.</h3><p>Your submission begins scoping and evidence review. It is not itself a certificate or conformance claim.</p></div>
             <div className="form-fields"><label>Organization<input name="organization" required maxLength={160} placeholder="Acme AI" /></label><label>Work email<input name="email" type="email" required maxLength={254} placeholder="security@company.com" /></label><label>Certification target<select name="target" defaultValue="AI Agent"><option>AI Agent</option><option>Agent Runtime / Harness</option><option>Platform / API</option><option>MCP Server</option><option>Physical AI System</option></select></label><label>Requested level<select name="level" defaultValue="AGP-L1"><option>AGP-L1</option><option>AGP-L2</option><option>AGP-L3</option><option>AGP-L4</option><option>AGP-P</option></select></label><label className="honeypot" aria-hidden="true">Company website<input name="companyWebsite" tabIndex={-1} autoComplete="off" /></label><label className="full">Architecture and security boundary<textarea name="summary" required minLength={40} maxLength={4000} placeholder="Describe the system, deployment model, trust boundary, and current security controls…" /></label><div className="form-action full"><button className="button" disabled={submitting} type="submit">{submitting ? "Submitting…" : "Apply for certification"}</button><span className={formError ? "form-status error" : "form-status"} role="status" aria-live="polite">{formStatus}</span></div></div>
           </form>
         </section>
 
         <section id="docs" className="section docs-section">
-          <div className="shell"><div className="section-heading light"><div><span className="kicker">DOCUMENTATION</span><h2>Build on Agent Guard.</h2></div><p>Move from product model to implementation details without leaving the site.</p></div><div className="docs-layout"><aside aria-label="Documentation topics">{Object.entries(docs).map(([key, doc]) => <button key={key} type="button" className={activeDoc === key ? "active" : ""} onClick={() => setActiveDoc(key)}>{doc.label}<span>→</span></button>)}</aside><article className="doc-content" tabIndex={-1}><span className="doc-index">AGENT GUARD DOCS / {activeDoc.toUpperCase()}</span><h3>{active.title}</h3>{active.body}<div className="doc-links"><a href="https://github.com/ColomboAI-com/cairo-agent-guard">GitHub repository ↗</a><a href="https://github.com/ColomboAI-com/cairo-agent-guard/blob/main/README.md">Full README ↗</a></div></article></div></div>
+          <div className="shell"><div className="section-heading light"><div><span className="kicker">DOCUMENTATION</span><h2>Build on Agent Guard.</h2></div><p>Search the full product model, then move into implementation details without leaving the site.</p></div><div className="docs-search"><label htmlFor="doc-search">Search documentation</label><input id="doc-search" type="search" value={docQuery} onChange={(event) => setDocQuery(event.target.value)} placeholder="Identity, Edge, deployment, certification…" /><span>{filteredDocs.length} topics</span></div><div className="docs-layout"><aside aria-label="Documentation topics">{filteredDocs.map(([key, doc]) => <button key={key} type="button" className={activeDoc === key ? "active" : ""} onClick={() => setActiveDoc(key)}>{doc.label}<span>→</span></button>)}{filteredDocs.length === 0 && <p className="docs-empty">No matching topics. Try “identity” or “runtime”.</p>}</aside><article className="doc-content" tabIndex={-1}><span className="doc-index">AGENT GUARD DOCS / {activeDoc.toUpperCase()}</span><h3>{active.title}</h3>{active.body}<div className="doc-links"><a href="https://github.com/ColomboAI-com/cairo-agent-guard">GitHub repository ↗</a><a href="https://github.com/ColomboAI-com/cairo-agent-guard/blob/main/README.md">Full README ↗</a></div></article></div></div>
         </section>
 
         <section id="quickstart" className="section open-section shell">
@@ -444,6 +549,11 @@ export function AgentGuardSite() {
 │   └── AGENT-GUARD-EDGE.md
 ├── security/
 └── website/`}</pre></div></div>
+        </section>
+
+        <section id="faq" className="section faq-section shell">
+          <div className="section-heading"><div><span className="kicker">FREQUENTLY ASKED QUESTIONS</span><h2>Clear boundaries build real trust.</h2></div><p>Agent Guard is ambitious about the security model and precise about what V0.1 does—and does not—provide today.</p></div>
+          <div className="faq-list">{faqs.map(([question, answer], index) => <details key={question}><summary><span>{String(index + 1).padStart(2, "0")}</span>{question}<b aria-hidden="true">+</b></summary><p>{answer}</p></details>)}</div>
         </section>
 
         <section className="finale shell"><div className="finale-logo"><CairoLogo /></div><span className="kicker">CAIRO AGENT GUARD</span><h2>Autonomous intelligence needs autonomous security.</h2><p>Build agents that can become more capable without silently becoming more powerful.</p><div className="hero-actions"><a className="button" href="#quickstart">Start integrating</a><a className="button button-ghost" href="#certification">Get certified</a></div></section>
