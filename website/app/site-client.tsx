@@ -1,9 +1,48 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element -- official Cairo SVG is served directly */
-
 import type { FormEvent, ReactNode } from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
+
+function CairoLogo({ title }: { title?: string }) {
+  const gradientId = `cairo-logo-${useId().replaceAll(":", "")}`;
+
+  return (
+    <svg
+      className="cairo-logo"
+      viewBox="0 0 1000 1000"
+      xmlns="http://www.w3.org/2000/svg"
+      role={title ? "img" : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : true}
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="30.5%" stopColor="#6237ff" />
+          <stop offset="100%" stopColor="#258eff" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M500 343.8c16.6 0 33.5 2.2 49.6 6.5 44.2-49.6 124.8-70.5 159.3-56.1 34.7 14.4-10.4 173.7-10.4 173.7 14.1 26.6 24.8 55.6 24.8 85.4 0 110.7-100 187.6-223.4 187.6S276.5 666.4 276.5 553.3c0-31 12.4-59.6 24.8-85.4 0 0-46.9-159.3-12.4-173.7 34.5-14.4 117.2 5.7 161.3 55.4 16.4-3.9 33.1-5.8 49.8-5.8Z"
+        fill="none"
+        stroke={`url(#${gradientId})`}
+        strokeWidth="20"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M400.7 544.2v12.4M599.3 544.2v12.4" fill="none" stroke={`url(#${gradientId})`} strokeWidth="20" strokeLinecap="round" />
+      <path
+        d="M518.6 609.2c5.6 0 10.6 3.4 12.7 8.5 2.1 5.1 1 11.1-3 15l-18.6 18.6c-5.4 5.4-14.1 5.4-19.5 0l-18.6-18.6c-3.9-3.9-5.1-9.9-3-15 2.1-5.2 7.2-8.5 12.7-8.5h37.3Z"
+        fill="none"
+        stroke={`url(#${gradientId})`}
+        strokeWidth="10"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="500" cy="500" r="388.6" fill="none" stroke={`url(#${gradientId})`} strokeWidth="18" />
+    </svg>
+  );
+}
 
 const decisions = [
   "ALLOW",
@@ -242,7 +281,7 @@ export function AgentGuardSite() {
 
       <header className="topbar">
         <a className="brand" href="#top" aria-label="Cairo Agent Guard home">
-          <img src="/AgentGuard/cairo-logo.svg" alt="" />
+          <CairoLogo />
           <span><b>Cairo</b> Agent Guard</span>
         </a>
         <button
@@ -282,7 +321,7 @@ export function AgentGuardSite() {
           <div className="hero-visual" aria-label="Example Agent Guard authorization decision">
             <div className="orbit orbit-a" />
             <div className="orbit orbit-b" />
-            <div className="hero-shield"><img src="/AgentGuard/cairo-logo.svg" alt="Cairo logo" /></div>
+            <div className="hero-shield"><CairoLogo title="Cairo" /></div>
             <div className="signal signal-identity"><span>IDENTITY</span><b>VERIFIED CLAIM</b></div>
             <div className="signal signal-mission"><span>MISSION</span><b>BOUND</b></div>
             <div className="signal signal-risk"><span>RISK</span><b>17 / 100</b></div>
@@ -343,7 +382,7 @@ export function AgentGuardSite() {
           <div className="section-heading"><div><span className="kicker">AGENT GUARD EDGE</span><h2>Protect your platform from agents.</h2></div><p>External agent authority is never automatically accepted. Edge intersects verified authority with your platform’s own policy before the request reaches an API, tool, data store, or device.</p></div>
           <div className="edge-pipeline"><div><span>01</span><b>Discover</b><small>Agent-aware ingress</small></div><div><span>02</span><b>Verify</b><small>Identity + authority</small></div><div><span>03</span><b>Classify</b><small>Trust state</small></div><div><span>04</span><b>Authorize</b><small>Local policy</small></div><div><span>05</span><b>Enforce</b><small>Before upstream</small></div><div><span>06</span><b>Record</b><small>Security evidence</small></div></div>
           <div className="edge-grid">
-            <div className="edge-map"><div className="edge-origin">External autonomous actor</div><div className="edge-core"><img src="/AgentGuard/cairo-logo.svg" alt="" /><b>AGENT GUARD EDGE</b><span>Platform sovereignty boundary</span></div><div className="edge-targets"><span>API</span><span>SaaS</span><span>MCP</span><span>DATA</span><span>COMMERCE</span><span>DEVICE</span></div></div>
+            <div className="edge-map"><div className="edge-origin">External autonomous actor</div><div className="edge-core"><CairoLogo /><b>AGENT GUARD EDGE</b><span>Platform sovereignty boundary</span></div><div className="edge-targets"><span>API</span><span>SaaS</span><span>MCP</span><span>DATA</span><span>COMMERCE</span><span>DEVICE</span></div></div>
             <div className="trust-states"><h3>Trust is a live state.</h3><div><b className="verified">VERIFIED</b><span>Continue to authority and policy.</span></div><div><b className="constrained">CONSTRAINED</b><span>Narrow routes, methods, budgets, or data.</span></div><div><b className="challenged">CHALLENGED</b><span>Require stronger evidence or approval.</span></div><div><b className="unknown">UNKNOWN</b><span>Isolate or deny sensitive access.</span></div><div><b className="revoked">REVOKED</b><span>Deny and link a security incident.</span></div><div><b className="hostile">HOSTILE</b><span>Quarantine and propagate intelligence.</span></div></div>
           </div>
           <p className="boundary-note centered"><b>Product boundary:</b> V0.1 ships Edge architecture and reference enforcement primitives. Distributed replay, semantic DLP, behavior detection, global control plane, HA, and SLAs remain managed-platform work.</p>
@@ -352,7 +391,7 @@ export function AgentGuardSite() {
         <section id="runtime" className="section runtime-section">
           <div className="shell">
             <div className="section-heading light"><div><span className="kicker">AGENT GUARD RUNTIME</span><h2>Protect the world from your agent.</h2></div><p>The model can reason about actions. Only the external Guardian can authorize and execute them.</p></div>
-            <div className="runtime-diagram"><div className="runtime-agent"><span>UNTRUSTED</span><b>Agent / model process</b><small>Proposes actions</small></div><div className="runtime-arrow">↓</div><div className="runtime-kernel"><img src="/AgentGuard/cairo-logo.svg" alt="" /><span>TRUSTED ENFORCEMENT</span><b>Agent Guard Kernel</b><small>Identity · mission · capability · replay · risk · revocation</small></div><div className="runtime-arrow">↓</div><div className="runtime-targets">{['MCP','TOOLS','SHELL','FILES','NETWORK','SECRETS','DELEGATION','CLOUD','PAIP'].map((item) => <span key={item}>{item}</span>)}</div></div>
+            <div className="runtime-diagram"><div className="runtime-agent"><span>UNTRUSTED</span><b>Agent / model process</b><small>Proposes actions</small></div><div className="runtime-arrow">↓</div><div className="runtime-kernel"><CairoLogo /><span>TRUSTED ENFORCEMENT</span><b>Agent Guard Kernel</b><small>Identity · mission · capability · replay · risk · revocation</small></div><div className="runtime-arrow">↓</div><div className="runtime-targets">{['MCP','TOOLS','SHELL','FILES','NETWORK','SECRETS','DELEGATION','CLOUD','PAIP'].map((item) => <span key={item}>{item}</span>)}</div></div>
             <div className="controls-grid"><article><span>01</span><h3>Capability control</h3><p>Short-lived, mission-bound, revocable authority instead of raw credentials.</p></article><article><span>02</span><h3>Delegation guard</h3><p>Every child remains a strict subset of parent scope, time, risk, and depth.</p></article><article><span>03</span><h3>Blind secrets</h3><p>Perform authenticated work without revealing credentials to the model.</p></article><article><span>04</span><h3>Replay defense</h3><p>Reject reused request IDs, nonces, and stale authorization envelopes.</p></article><article><span>05</span><h3>Quarantine trees</h3><p>Stop an agent and its known delegated descendants immediately.</p></article><article><span>06</span><h3>Flight recorder</h3><p>Hash-chain structured actions without collecting private chain-of-thought.</p></article></div>
           </div>
         </section>
@@ -407,10 +446,10 @@ export function AgentGuardSite() {
 └── website/`}</pre></div></div>
         </section>
 
-        <section className="finale shell"><div className="finale-logo"><img src="/AgentGuard/cairo-logo.svg" alt="" /></div><span className="kicker">CAIRO AGENT GUARD</span><h2>Autonomous intelligence needs autonomous security.</h2><p>Build agents that can become more capable without silently becoming more powerful.</p><div className="hero-actions"><a className="button" href="#quickstart">Start integrating</a><a className="button button-ghost" href="#certification">Get certified</a></div></section>
+        <section className="finale shell"><div className="finale-logo"><CairoLogo /></div><span className="kicker">CAIRO AGENT GUARD</span><h2>Autonomous intelligence needs autonomous security.</h2><p>Build agents that can become more capable without silently becoming more powerful.</p><div className="hero-actions"><a className="button" href="#quickstart">Start integrating</a><a className="button button-ghost" href="#certification">Get certified</a></div></section>
       </main>
 
-      <footer><div className="shell footer-grid"><div className="brand footer-brand"><img src="/AgentGuard/cairo-logo.svg" alt="" /><span><b>Cairo</b> Agent Guard</span></div><p>Agentic security infrastructure by ColomboAI.</p><div><a href="https://github.com/ColomboAI-com/cairo-agent-guard">GitHub</a><a href="#docs">Documentation</a><a href="#certification">Certification</a></div><div><span>Cairo.sh/AgentGuard</span><span>V0.1 Foundation</span><span>© 2026 ColomboAI Inc.</span></div></div></footer>
+      <footer><div className="shell footer-grid"><div className="brand footer-brand"><CairoLogo /><span><b>Cairo</b> Agent Guard</span></div><p>Agentic security infrastructure by ColomboAI.</p><div><a href="https://github.com/ColomboAI-com/cairo-agent-guard">GitHub</a><a href="#docs">Documentation</a><a href="#certification">Certification</a></div><div><span>Cairo.sh/AgentGuard</span><span>V0.1 Foundation</span><span>© 2026 ColomboAI Inc.</span></div></div></footer>
     </>
   );
 }

@@ -20,3 +20,9 @@ test("hosting package declares durable certification storage", () => {
   assert.equal(hosting.r2, null);
   assert.equal(existsSync("drizzle/0000_lethal_marvel_boy.sql"), true);
 });
+
+test("visible Cairo logos are self-contained across reverse proxies", () => {
+  const source = readFileSync("app/site-client.tsx", "utf8");
+  assert.match(source, /function CairoLogo/);
+  assert.doesNotMatch(source, /\/AgentGuard\/cairo-logo\.svg/);
+});
