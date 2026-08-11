@@ -1,10 +1,11 @@
+import base64
 from datetime import UTC, datetime, timedelta
 
 import pytest
 
 from agentguard.capability import CapabilityAuthority
 from agentguard.guard import AgentRequest, Effect, Guard
-from agentguard.identity import IdentityAuthority
+from agentguard.identity import IdentityAuthority, TokenError
 
 
 NOW = datetime(2026, 8, 10, 20, 30, tzinfo=UTC)
@@ -244,3 +245,36 @@ def test_out_of_range_risk_is_denied() -> None:
     )
     assert decision.effect is Effect.DENY
     assert decision.reason == "risk score is outside 0..100"
+
+
+def test_capability_rejects_noncanonical_signature_encoding() -> None:
+    capabilities = CapabilityAuthority(
+        issuer="agp://cairo/capabilities",
+        signing_keys={"cap-2026": b"test-capability-key-at-least-32-b"},
+        active_key_id="cap-2026",
+        clock=lambda: NOW,
+    )
+    token = capabilities.issue(
+        agent_id="agp://cairo/agent-1",
+        principal_id="org://acme",
+        mission_id="mission://safe",
+        resources=["crm/customer/*"],
+        actions=["read"],
+        max_risk=40,
+        expires_at=NOW + timedelta(minutes=10),
+    )
+    head, payload, signature = token.split(".")
+    decoded = base64.urlsafe_b64decode(signature + "=" * (-len(signature) % 4))
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+    equivalent = next(
+        candidate
+        for candidate in alphabet
+        if candidate != signature[-1]
+        and base64.urlsafe_b64decode(
+            signature[:-1] + candidate + "=" * (-len(signature) % 4)
+        )
+        == decoded
+    )
+
+    with pytest.raises(TokenError, match="signature"):
+        capabilities.verify(f"{head}.{payload}.{signature[:-1]}{equivalent}")

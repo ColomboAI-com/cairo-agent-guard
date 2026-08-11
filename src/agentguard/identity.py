@@ -7,29 +7,23 @@ replace this authority with an asymmetric issuer behind the same interface.
 
 from __future__ import annotations
 
-import base64
-import hashlib
-import hmac
 import json
 import secrets
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from typing import Callable, Mapping
 
-
-class TokenError(ValueError):
-    """Raised when an AGP token cannot be trusted."""
-
-
-def _encode(data: bytes) -> str:
-    return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
+from .token_codec import (
+    TokenError,
+    decode_segment,
+    encode_segment,
+    sign_hmac_sha256,
+    verify_hmac_sha256,
+)
 
 
 def _decode(data: str) -> bytes:
-    try:
-        return base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))
-    except Exception as exc:  # pragma: no cover - Python varies by malformed input
-        raise TokenError("invalid token encoding") from exc
+    return decode_segment(data, error_message="invalid token encoding")
 
 
 def _timestamp(value: datetime) -> str:
@@ -111,12 +105,16 @@ class IdentityAuthority:
 
     def _sign(self, payload: dict[str, object], key_id: str) -> str:
         header = {"alg": "HS256", "kid": key_id, "typ": "AGP"}
-        head = _encode(json.dumps(header, sort_keys=True, separators=(",", ":")).encode())
-        body = _encode(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode())
-        signature = hmac.new(
-            self._keys[key_id], f"{head}.{body}".encode("ascii"), hashlib.sha256
-        ).digest()
-        return f"{head}.{body}.{_encode(signature)}"
+        head = encode_segment(
+            json.dumps(header, sort_keys=True, separators=(",", ":")).encode()
+        )
+        body = encode_segment(
+            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+        )
+        signature = sign_hmac_sha256(
+            self._keys[key_id], f"{head}.{body}".encode("ascii")
+        )
+        return f"{head}.{body}.{signature}"
 
     def _verify(self, token: str) -> dict[str, object]:
         try:
@@ -126,11 +124,12 @@ class IdentityAuthority:
             key = self._keys[key_id]
         except (ValueError, KeyError, json.JSONDecodeError) as exc:
             raise TokenError("malformed or unknown token") from exc
-        expected = hmac.new(
-            key, f"{head}.{body}".encode("ascii"), hashlib.sha256
-        ).digest()
-        if not hmac.compare_digest(expected, _decode(signature)):
-            raise TokenError("invalid token signature")
+        verify_hmac_sha256(
+            key,
+            f"{head}.{body}".encode("ascii"),
+            signature,
+            error_message="invalid token signature",
+        )
         try:
             payload = json.loads(_decode(body))
         except json.JSONDecodeError as exc:
