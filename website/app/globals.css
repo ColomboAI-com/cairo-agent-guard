@@ -340,6 +340,65 @@ footer { border-top: 1px solid var(--line); background: #050610; }
 .footer-grid > div:nth-child(3), .footer-grid > div:nth-child(4) { display: flex; flex-direction: column; gap: 10px; }
 .footer-brand span { color: white; font-size: 13px; }
 
+/* Readability baseline: product information must remain legible without zoom. */
+.topbar nav, .button { font-size: 14px; }
+.eyebrow, .kicker, .hero-category,
+.principle > span, .proof-strip b, .pillar-number,
+.threat-grid article > span, .threat-statement b,
+.identity-lifecycle span, .card-head, .code-head,
+.trust-card dt, .trust-result span, .protocol-flow span,
+.edge-pipeline span, .runtime-agent span, .runtime-kernel span,
+.controls-grid article > span, .plane-grid article > span,
+.nonbypass b, .integration-grid article > div, .levels b,
+.docs-search label, .docs-search span, .doc-index,
+.repo-tree::before, .faq-list summary span { font-size: 12px; }
+.hero-category, .principle > span, .pillar-number,
+.threat-grid article > span, .identity-lifecycle span,
+.card-head, .code-head, .trust-card dt, .trust-result span,
+.protocol-flow span, .edge-pipeline span, .runtime-agent span,
+.runtime-kernel span, .controls-grid article > span,
+.integration-grid article > div, .docs-search label,
+.docs-search span, .doc-index, .repo-tree::before,
+.faq-list summary span { color: #929dbd; }
+.principle p, .proof-strip span, .pillar li, .pillar a,
+.threat-grid p, .boundary-note, .decision-panel p,
+.plane-grid li, .check-list li, .nonbypass p,
+.integration-grid p, .ecosystem-callout p, .form-intro p {
+  font-size: 14px;
+}
+.signal span { color: #919cbc; font-size: 12px; }
+.signal b { font-size: 13px; }
+.hero-flow { color: #a8b2d0; font-size: 11px; }
+.pillar p, .faq-list details p { font-size: 15px; }
+.identity-lifecycle b { font-size: 14px; }
+.trust-card dd { font-size: 13px; }
+.protocol-flow small, .runtime-agent small, .runtime-kernel small {
+  color: #9ba5c2;
+  font-size: 13px;
+}
+.code-panel pre, .repo-tree pre, .doc-content pre { font-size: 13px; }
+.decision-cloud span, .edge-pipeline small, .edge-origin,
+.edge-core span, .edge-targets span, .trust-states b,
+.runtime-targets span, .code-status, .levels small,
+.cert-flow { font-size: 12px; }
+.edge-pipeline b, .edge-core b { font-size: 14px; }
+.edge-pipeline small, .edge-core span, .edge-targets span,
+.trust-states span, .runtime-targets span, .controls-grid p,
+.levels small, .cert-flow, .form-status, .docs-empty,
+.docs-layout aside button, .doc-links a, .footer-grid p,
+.footer-grid span, .footer-grid a { color: #96a1c0; }
+.trust-states span, .controls-grid p, .levels small,
+.form-status, .docs-empty, .docs-layout aside button,
+.doc-links a { font-size: 14px; }
+.code-status { color: #a1abc7; }
+.levels span { font-size: 15px; }
+.form-fields label { font-size: 13px; }
+.docs-search input { font-size: 14px; }
+.doc-content h4 { font-size: 17px; }
+.doc-content p, .doc-content li { font-size: 15px; }
+.footer-grid p, .footer-grid span, .footer-grid a { font-size: 13px; }
+.footer-brand span { font-size: 15px; }
+
 @media (max-width: 1040px) {
   .topbar nav { gap: 15px; }
   .hero { grid-template-columns: 1fr; padding-top: 160px; }
@@ -379,7 +438,7 @@ footer { border-top: 1px solid var(--line); background: #050610; }
   .signal { min-width: 110px; padding: 10px; }
   .signal-identity, .signal-risk { left: 0; }
   .signal-mission, .signal-effect { right: 0; }
-  .hero-flow { bottom: 6px; gap: 5px; padding-inline: 9px; font-size: 7px; }
+  .hero-flow { bottom: 6px; gap: 5px; padding-inline: 9px; font-size: 11px; }
   .proof-strip { grid-template-columns: 1fr 1fr; }
   .proof-strip div:nth-child(2) { border-right: 0; }
   .proof-strip div { border-bottom: 1px solid var(--line); }

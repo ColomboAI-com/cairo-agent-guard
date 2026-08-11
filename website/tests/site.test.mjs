@@ -47,3 +47,13 @@ test("the legacy logo URL returns a dynamic proxy-safe SVG", () => {
   assert.match(route, /new Response\(CAIRO_LOGO_SVG/);
   assert.doesNotMatch(route, /x-vinext-static-file/);
 });
+
+test("critical product information uses the readable typography baseline", () => {
+  const styles = readFileSync("app/globals.css", "utf8");
+  assert.match(styles, /\.topbar nav, \.button \{ font-size: 14px; \}/);
+  assert.match(styles, /\.identity-lifecycle b \{ font-size: 14px; \}/);
+  assert.match(styles, /\.runtime-targets span,[\s\S]*?font-size: 12px;/);
+  assert.match(styles, /\.doc-content p, \.doc-content li \{ font-size: 15px; \}/);
+  assert.match(styles, /\.footer-grid p, \.footer-grid span, \.footer-grid a \{ font-size: 13px; \}/);
+  assert.doesNotMatch(styles, /\.hero-flow \{[^}]*font-size: 7px;/);
+});

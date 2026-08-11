@@ -23,6 +23,7 @@ The redesigned journey is organized for both executive evaluation and technical 
 
 ## Interaction and accessibility upgrades
 
+- Raised the site-wide minimum type scale and contrast for navigation, lifecycle steps, trust records, diagrams, documentation, forms, and footer content so product information remains readable without browser zoom.
 - Semantic landmarks and heading hierarchy remain intact.
 - Skip navigation, visible keyboard focus, reduced-motion behavior, accessible form labels, live form status, and native FAQ disclosure controls are preserved or added.
 - Navigation now identifies the current section with `aria-current`.
@@ -37,4 +38,3 @@ No technical boundary was softened for marketing. Integration cards distinguish 
 ## Deployment status
 
 This redesign is prepared as a focused reviewable pull request. It is not directly deployed to production by this change set.
-
