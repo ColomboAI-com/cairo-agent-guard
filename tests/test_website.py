@@ -1,14 +1,37 @@
+import json
 from pathlib import Path
 
 
-def test_website_uses_durable_certification_api_and_contains_rich_docs() -> None:
-    html = Path("website/index.html").read_text(encoding="utf-8")
-    app = Path("website/app.js").read_text(encoding="utf-8")
-    assert 'id="cert-form"' in html
-    assert "v1/certification/applications" in app
-    assert "localStorage" not in app
-    assert app.count("title:") >= 10
-    assert "CairoExecutionGateway.beforeToolCall" in app
+def test_website_is_a_full_three_pillar_product_experience() -> None:
+    page = Path("website/app/site-client.tsx").read_text(encoding="utf-8")
+    layout = Path("website/app/layout.tsx").read_text(encoding="utf-8")
+
+    assert "Agent Identity" in page
+    assert "Agent Guard Protocol" in page
+    assert "Agent Guard Edge" in page
+    assert "Agent Guard Runtime" in page
+    assert "Apply for Agent Guard certification" in page
+    assert "Cairo Super Agent" in page
+    assert "Security infrastructure for the " in page
+    assert "<em>Agentic Internet.</em>" in page
+    assert "https://cairo.sh/AgentGuard" in layout
+    assert "/AgentGuard/og.png" in layout
+
+
+def test_certification_intake_uses_durable_site_storage() -> None:
+    route = Path(
+        "website/app/api/certification/applications/route.ts"
+    ).read_text(encoding="utf-8")
+    schema = Path("website/db/schema.ts").read_text(encoding="utf-8")
+    hosting = json.loads(
+        Path("website/.openai/hosting.json").read_text(encoding="utf-8")
+    )
+
+    assert "certificationApplications" in route
+    assert "crypto.randomUUID" in route
+    assert "certification_applications" in schema
+    assert hosting["d1"] == "DB"
+    assert hosting["r2"] is None
 
 
 def test_repository_presents_identity_protocol_and_edge_as_first_class_pillars() -> None:
