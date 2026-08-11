@@ -1,0 +1,40 @@
+name: Deploy to dev.cairo.sh
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'website/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            export NVM_DIR="$HOME/.nvm"
+            . "$NVM_DIR/nvm.sh"
+
+            cd /var/www/html/ivtspl/cairo-agent-guard
+            git pull origin main
+
+            cd website
+            npm install --legacy-peer-deps --silent
+            npm run build
+
+            pm2 restart agentguard-dev
+            sleep 3
+
+            # Smoke test
+            STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4000/AgentGuard)
+            if [ "$STATUS" != "200" ]; then
+              echo "Smoke test failed: HTTP $STATUS"
+              exit 1
+            fi
+            echo "Deploy OK — HTTP $STATUS"
