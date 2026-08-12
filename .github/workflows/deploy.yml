@@ -1,4 +1,4 @@
-name: Deploy to dev.cairo.sh
+name: Deploy AgentGuard website
 
 on:
   push:
@@ -6,11 +6,18 @@ on:
     paths:
       - 'website/**'
 
+# Cancel any in-progress deploy for the same branch if a new push arrives
+concurrency:
+  group: deploy-agentguard
+  cancel-in-progress: false   # never cancel a running deploy — queue it instead
+
 jobs:
-  deploy:
+  # ── Deploy to dev.cairo.sh (GCP dev server 130.211.233.141) ──────────────
+  deploy-dev:
+    name: Deploy → dev.cairo.sh/AgentGuard
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to server via SSH
+      - name: Deploy to dev server via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -29,12 +36,46 @@ jobs:
             npm run build
 
             pm2 restart agentguard-dev
-            sleep 3
+            sleep 5
 
-            # Smoke test
             STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4000/AgentGuard)
             if [ "$STATUS" != "200" ]; then
-              echo "Smoke test failed: HTTP $STATUS"
+              echo "Dev smoke test failed: HTTP $STATUS"
               exit 1
             fi
-            echo "Deploy OK — HTTP $STATUS"
+            echo "Dev deploy OK — HTTP $STATUS"
+
+  # ── Deploy to cairo.sh (GCP prod server 34.171.166.24) ───────────────────
+  # Only runs after dev deploy succeeds
+  deploy-prod:
+    name: Deploy → cairo.sh/AgentGuard
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    steps:
+      - name: Deploy to prod server via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PROD_DEPLOY_HOST }}
+          username: ${{ secrets.PROD_DEPLOY_USER }}
+          key: ${{ secrets.PROD_DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            export NVM_DIR="$HOME/.nvm"
+            . "$NVM_DIR/nvm.sh"
+
+            cd /var/www/html/cairo/cairo-agent-guard
+            git pull origin main
+
+            cd website
+            npm install --legacy-peer-deps --silent
+            npm run build
+
+            pm2 restart agentguard
+            sleep 5
+
+            STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4000/AgentGuard)
+            if [ "$STATUS" != "200" ]; then
+              echo "Prod smoke test failed: HTTP $STATUS"
+              exit 1
+            fi
+            echo "Prod deploy OK — HTTP $STATUS"
