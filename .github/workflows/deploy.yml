@@ -6,6 +6,11 @@ on:
     paths:
       - 'website/**'
 
+# Cancel any in-progress deploy for the same branch if a new push arrives
+concurrency:
+  group: deploy-agentguard
+  cancel-in-progress: false   # never cancel a running deploy — queue it instead
+
 jobs:
   # ── Deploy to dev.cairo.sh (GCP dev server 130.211.233.141) ──────────────
   deploy-dev:
@@ -41,6 +46,7 @@ jobs:
             echo "Dev deploy OK — HTTP $STATUS"
 
   # ── Deploy to cairo.sh (GCP prod server 34.171.166.24) ───────────────────
+  # Only runs after dev deploy succeeds
   deploy-prod:
     name: Deploy → cairo.sh/AgentGuard
     runs-on: ubuntu-latest
