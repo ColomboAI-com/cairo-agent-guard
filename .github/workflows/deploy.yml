@@ -3,13 +3,11 @@ name: Deploy AgentGuard website
 on:
   push:
     branches: [main]
-    paths:
-      - 'website/**'
 
-# Cancel any in-progress deploy for the same branch if a new push arrives
+# Prevent simultaneous deploys — queue if one is already running
 concurrency:
   group: deploy-agentguard
-  cancel-in-progress: false   # never cancel a running deploy — queue it instead
+  cancel-in-progress: false
 
 jobs:
   # ── Deploy to dev.cairo.sh (GCP dev server 130.211.233.141) ──────────────
